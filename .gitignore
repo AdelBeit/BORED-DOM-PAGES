@@ -48,5 +48,4 @@ Temporary Items
 
 # My Files
 .env
-**/groups.json
-./node sandbox/bots/groups.json
+groups.json
