@@ -49,3 +49,5 @@ Temporary Items
 # My Files
 .env
 groups.json
+*.creds
+

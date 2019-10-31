@@ -8,7 +8,7 @@ const botid = creds.botid;
 const port = 443;
 const hostname = "api.groupme.com";
 let path = '/v3/bots/post';
-path = 'https://image.groupme.com/pictures'
+path = 'https://image.groupme.com/pictures';
 
 let getGroupID = {
   options: {
