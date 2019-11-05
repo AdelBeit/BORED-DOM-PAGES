@@ -3,9 +3,9 @@ require('dotenv').config();
 const https = require('https');
 const fs = require('fs');
 
-const token = process.env.TOKEN;
-const groupid = process.env.GROUPID;
-const botid = process.env.BOTID;
+const TOKEN = process.env.TOKEN;
+const GROUPID = process.env.GROUPID;
+const BOTID = process.env.BOTID;
 const port = 443;
 const hostname = "api.groupme.com";
 let path = '/v3/bots/post';
@@ -16,34 +16,34 @@ let getGroupID = () => {
     options: {
       hostname: hostname,
       port: port,
-      path: '/v3/groups?token='+token,
-      method: 'GET'  
+      path: '/v3/groups?token=' + TOKEN,
+      method: 'GET'
     }
   }
 }
 
-let makeBot = (name="Olive") => {
+let makeBot = (name = "Olive") => {
   return {
     options: {
       hostname: hostname,
       port: port,
-      path: '/v3/bots?token='+token,
+      path: '/v3/bots?token=' + TOKEN,
       method: 'POST',
       headers: {
-        'X-Access-Token': token,
+        'X-Access-Token': TOKEN,
         'Content-Type': 'text/json'
       }
     },
     body: {
-      bot:{
+      bot: {
         name: name,
-        group_id: groupid
+        group_id: GROUPID
       }
     }
   }
 }
 
-let sendMessage = (text="PIZZA") => {
+let sendMessage = (text = "PIZZA") => {
   return {
     options: {
       hostname: hostname,
@@ -52,74 +52,74 @@ let sendMessage = (text="PIZZA") => {
       method: 'POST'
     },
     body: {
-      "bot_id": "1393072c25398c3be6fbe37c6e",
-      "text": text
+      text: text,
+      bot_id: BOTID
     }
   }
 }
 
-let sendLocation = (loc={type:"Apple Farm",lng:40,lat:70,name:"The Farm"}) => {
-  return {
-    options: (console.log("hi"))(),
-    body: {
-      bot_id: botid,
-      text: "nice weather we're having",
-      attachments: [
-        {
-          type: "location",
-          lng: 40,
-          lat: 70,
-          name: "Groupme HQ"
-        }
-      ]
-    }
-  }
-}
-
-let sendImage = (url="") => {
+let sendLocation = (
+  loc = {type: "Apple Farm",lng: 40,lat: 70,name: "The Farm"},
+  text = "tally ho"
+  ) => {
   return {
     options: sendMessage().options,
     body: {
-      "bot_id": botid,
-      "text": "jojo",
-      "attachments": [
-          {
-              "type": "image",
-              // "url": "https://i.groupme.com/somethingsomething.large"
-              "url": url
-            }
-          ]
+      bot_id: BOTID,
+      text: text,
+      attachments: [{
+        type: loc.type,
+        lng: loc.lng,
+        lat: loc.lat,
+        name: loc.name
+      }]
     }
   }
 }
 
-let uploadImage = (imageName='capture.jpeg',req=null) => {
-  return {
+let getImgURL = () => {
+    return {
     options: {
-      url: 'https://image.groupme.com/pictures',
+      hostname: 'image.groupme.com',
+      port: port,
+      path: '/pictures',
       method: 'POST',
       headers: {
-        'X-Access-Token': token,
+        'X-Access-Token': TOKEN,
         'Content-Type': 'image/jpeg'
-        // 'Content-Type': ''
       }
-    },
-    body: {
-      file: fs.readFile(imageName, (err, data) => {
-        if(err) throw err;
-        // sendImage(data);
-        // req.end(data);
-      })
     }
   };
 }
 
-const req = https.request(sendMessage().options, (res) => {
+let sendImage = (imageURL) => {
+  return {
+    options: sendMessage().options,
+    body: {
+      bot_id: BOTID,
+      text: "jojo",
+      attachments: [{
+        type: "image",
+        // "url": "https://i.groupme.com/somethingsomething.large"
+        url: url
+      }]
+    }
+  }
+}
+
+function uploadImage(req,imgName='capture.jpeg'){
+  fs.readFile(imgName, (err, data) => {
+    if (err) throw err;
+    req.end(data);
+  });
+}
+
+const req = https.request(getImgURL().options, (res) => {
   res.on('data', (d) => {
     process.stdout.write(d);
-    // let url = JSON.parse(d.toString()).payload.picture_url;
+    let url = JSON.parse(d.toString()).payload.picture_url;
     // console.log(url);
-    // process.stdout.write(url);
+    process.stdout.write(url);
   });
 });
 
@@ -127,24 +127,15 @@ req.on('error', (e) => {
   console.error(e);
   console.log();
 });
-// req.end(JSON.stringify(sendMessage().body));
+
+uploadImage(req);
+
 // fs.readFile('capture.jpeg', (e, d) => {
 //   if(e) throw e;
-//   // req.end(d);
+//   req.end(d);
 // });
-// console.log(uploadImage().body.file);
 
-// sendImage.imageName = 'capture.jpg';
 // req.end(JSON.stringify(sendImage.body));
-
-
-// // const req = https.post(options, (res) => {
-// //   console.log('statusCode:', res.statusCode);
-// //   console.log('headers:', res.headers);
-// //   res.on('data', (d) => {
-// //     process.stdout.write(d);
-// //   });
-// // });
 
 
 // // const limit = 256;
@@ -192,7 +183,7 @@ req.on('error', (e) => {
 // // //       }
 // // //     }
 // // //   }
-  
+
 // // //   var sequence = fibonacci();
 // // //   console.log(sequence.next().value);     // 0
 // // //   console.log(sequence.next().value);     // 1
