@@ -1,123 +1,138 @@
 /* eslint-disable no-unused-vars */
+require('dotenv').config();
 const https = require('https');
 const fs = require('fs');
-const env = require('env');
 
-const token = env.creds.token;
-const groupid = env.creds.groupid;
-const botid = env.creds.botid;
-console.log(process.env.creds.token);
-// const port = 443;
-// const hostname = "api.groupme.com";
-// let path = '/v3/bots/post';
-// path = 'https://image.groupme.com/pictures';
+const token = process.env.TOKEN;
+const groupid = process.env.GROUPID;
+const botid = process.env.BOTID;
+const port = 443;
+const hostname = "api.groupme.com";
+let path = '/v3/bots/post';
+path = 'https://image.groupme.com/pictures';
 
-// let getGroupID = {
-//   options: {
-//     hostname: hostname,
-//     port: port,
-//     path: '/v3/groups?token='+token,
-//     method: 'GET'  
-//   }
-// }
+let getGroupID = () => {
+  return {
+    options: {
+      hostname: hostname,
+      port: port,
+      path: '/v3/groups?token='+token,
+      method: 'GET'  
+    }
+  }
+}
 
-// let makeBot = {
-//   options: {
-//     hostname: hostname,
-//     port: port,
-//     path: '/v3/bots?token='+token,
-//     method: 'POST',
-//     headers: {
-//       'X-Access-Token': token,
-//       'Content-Type': 'text/json'
-//     }
-//   },
-//   body: {
-//     bot:{
-//       name: "Olive",
-//       group_id: groupid
-//     }
-//   }
-// }
+let makeBot = (name="Olive") => {
+  return {
+    options: {
+      hostname: hostname,
+      port: port,
+      path: '/v3/bots?token='+token,
+      method: 'POST',
+      headers: {
+        'X-Access-Token': token,
+        'Content-Type': 'text/json'
+      }
+    },
+    body: {
+      bot:{
+        name: name,
+        group_id: groupid
+      }
+    }
+  }
+}
 
-// let sendMessage = {
-//   options: {
-//     hostname: hostname,
-//     port: port,
-//     path: '/v3/bots/post',
-//     method: 'POST'
-//   },
-//   body: {
-//     bot_id: botid,
-//     text: "pizza"
-//   }
-// }
+let sendMessage = (text="PIZZA") => {
+  return {
+    options: {
+      hostname: hostname,
+      port: port,
+      path: '/v3/bots/post',
+      method: 'POST'
+    },
+    body: {
+      "bot_id": "1393072c25398c3be6fbe37c6e",
+      "text": text
+    }
+  }
+}
 
-// let sendLocation = {
-//   options: sendMessage.options,
-//   body: {
-//     bot_id: botid,
-//     text: "nice weather we're having",
-//     attachments: [
-//       {
-//         type: "location",
-//         lng: 40,
-//         lat: 70,
-//         name: "Groupme HQ"
-//       }
-//     ]
-//   }
-// }
+let sendLocation = (loc={type:"Apple Farm",lng:40,lat:70,name:"The Farm"}) => {
+  return {
+    options: (console.log("hi"))(),
+    body: {
+      bot_id: botid,
+      text: "nice weather we're having",
+      attachments: [
+        {
+          type: "location",
+          lng: 40,
+          lat: 70,
+          name: "Groupme HQ"
+        }
+      ]
+    }
+  }
+}
 
-// let sendImage = {
-//   options: sendMessage.options,
-//   body: {
-//     "bot_id"  : botid,
-//     "text"    : "jojo",
-//     "attachments" : [
-//         {
-//             "type"  : "image",
-//             "url"   : "https://i.groupme.com/somethingsomething.large"
-//           }
-//         ]
-//   }
-// }
+let sendImage = (url="") => {
+  return {
+    options: sendMessage().options,
+    body: {
+      "bot_id": botid,
+      "text": "jojo",
+      "attachments": [
+          {
+              "type": "image",
+              // "url": "https://i.groupme.com/somethingsomething.large"
+              "url": url
+            }
+          ]
+    }
+  }
+}
 
-// let uploadImage = {
-//   headers: {
-//     'X-Access-Token': token,
-//     // 'Content-Type': 'image/jpeg'
-//     'Content-Type': ''
-//   },
-//   options: {
-//     url: 'https://image.groupme.com/pictures',
-//     method: 'POST',
-//     headers: uploadImage.headers
-//   },
-//   body: {
-//     file: fs.readFile(imageName, (err, data) => {
-//       if(err) throw err;  
-//       req.end(data);
-//     })
-//   }
-// };
+let uploadImage = (imageName='capture.jpeg',req=null) => {
+  return {
+    options: {
+      url: 'https://image.groupme.com/pictures',
+      method: 'POST',
+      headers: {
+        'X-Access-Token': token,
+        'Content-Type': 'image/jpeg'
+        // 'Content-Type': ''
+      }
+    },
+    body: {
+      file: fs.readFile(imageName, (err, data) => {
+        if(err) throw err;
+        // sendImage(data);
+        // req.end(data);
+      })
+    }
+  };
+}
 
-// const req = https.request(sendImage.options, (res) => {
-//   res.on('data', (d) => {
-//     process.stdout.write(d);
-//   //   // let url = JSON.parse(d.toString()).payload.picture_url;
-//   });
-// });
+const req = https.request(sendMessage().options, (res) => {
+  res.on('data', (d) => {
+    process.stdout.write(d);
+    // let url = JSON.parse(d.toString()).payload.picture_url;
+    // console.log(url);
+    // process.stdout.write(url);
+  });
+});
 
-
-// req.on('error', (e) => {
-//   console.error(e);
-//   console.log();
-// });
+req.on('error', (e) => {
+  console.error(e);
+  console.log();
+});
+// req.end(JSON.stringify(sendMessage().body));
 // fs.readFile('capture.jpeg', (e, d) => {
-//   if(e) throw e;  
+//   if(e) throw e;
 //   // req.end(d);
 // });
+// console.log(uploadImage().body.file);
 
 // sendImage.imageName = 'capture.jpg';
 // req.end(JSON.stringify(sendImage.body));
