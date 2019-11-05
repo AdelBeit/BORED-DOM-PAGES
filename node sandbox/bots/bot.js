@@ -6,27 +6,42 @@ const fs = require('fs');
 const TOKEN = process.env.TOKEN;
 const GROUPID = process.env.GROUPID;
 const BOTID = process.env.BOTID;
-const port = 443;
-const hostname = "api.groupme.com";
-let path = '/v3/bots/post';
-path = 'https://image.groupme.com/pictures';
+const PORT = 443;
+const HOSTNAME = "api.groupme.com";
 
-let getGroupID = () => {
+let getGroupIDReq = () => {
   return {
     options: {
-      hostname: hostname,
-      port: port,
+      hostname: HOSTNAME,
+      port: PORT,
       path: '/v3/groups?token=' + TOKEN,
       method: 'GET'
     }
   }
 }
 
-let makeBot = (name = "Olive") => {
+// returns all groupIDs in a JSON format
+function getGroupID(){
+  const req = https.request(getGroupIDReq().options, (res) => {
+    res.on('data', (d) => {
+      // d is the response of the request
+      process.stdout.write(d);
+    });
+  });
+  
+  req.on('error', (e) => {
+    console.error(e);
+    console.log();
+  });
+  
+  req.end();
+}
+
+let makeBotReq = (name = "Olive") => {
   return {
     options: {
-      hostname: hostname,
-      port: port,
+      hostname: HOSTNAME,
+      port: PORT,
       path: '/v3/bots?token=' + TOKEN,
       method: 'POST',
       headers: {
@@ -43,11 +58,27 @@ let makeBot = (name = "Olive") => {
   }
 }
 
-let sendMessage = (text = "PIZZA") => {
+function makeBot(botName="Jello"){
+  const req = https.request(makeBotReq(botName).options, (res) => {
+    res.on('data', (d) => {
+      // d is the response of the request
+      process.stdout.write(d);
+    });
+  });
+  
+  req.on('error', (e) => {
+    console.error(e);
+    console.log();
+  });
+  
+  req.end(makeBotReq(botName).body);
+}
+
+let sendMessageReq = (text = "PIZZA") => {
   return {
     options: {
-      hostname: hostname,
-      port: port,
+      hostname: HOSTNAME,
+      port: PORT,
       path: '/v3/bots/post',
       method: 'POST'
     },
@@ -58,12 +89,28 @@ let sendMessage = (text = "PIZZA") => {
   }
 }
 
-let sendLocation = (
-  loc = {type: "Apple Farm",lng: 40,lat: 70,name: "The Farm"},
+function sendMessage(message){
+  const req = https.request(sendMessageReq(message).options, (res) => {
+    res.on('data', (d) => {
+      // d is the response of the request
+      process.stdout.write(d);
+    });
+  });
+  
+  req.on('error', (e) => {
+    console.error(e);
+    console.log();
+  });
+  
+  req.end(sendMessageReq(message).body);
+}
+
+let sendLocReq = (
+  loc = {type: "location",lng: 40,lat: 70,name: "Apple Farm"},
   text = "tally ho"
   ) => {
   return {
-    options: sendMessage().options,
+    options: sendMessageReq().options,
     body: {
       bot_id: BOTID,
       text: text,
@@ -77,11 +124,33 @@ let sendLocation = (
   }
 }
 
-let getImgURL = () => {
+function sendLoc(longitude,latitude,name,type="location"){
+  const loc = {
+    type: type,
+    lng: longitude,
+    lat: latitude,
+    name: name
+  };
+  const req = https.request(sendLocReq(loc).options, (res) => {
+    res.on('data', (d) => {
+      // d is the response of the request
+      process.stdout.write(d);
+    });
+  });
+  
+  req.on('error', (e) => {
+    console.error(e);
+    console.log();
+  });
+  
+  req.end(sendLocReq(loc).body);
+}
+
+let ImageURLReq = () => {
     return {
     options: {
       hostname: 'image.groupme.com',
-      port: port,
+      port: PORT,
       path: '/pictures',
       method: 'POST',
       headers: {
@@ -92,51 +161,65 @@ let getImgURL = () => {
   };
 }
 
-let sendImage = (imageURL) => {
+// upload an image to groupme servers and grab url
+function getImageURL(imageName='capture.jpeg'){
+  // upload the image with this request
+  const req = https.request(ImageURLReq().options, (res) => {
+    res.on('data', (d) => {
+      // process.stdout.write(d);
+      // grab the url from the response
+      let url = JSON.parse(d.toString()).payload.picture_url;
+      // post the image to the chat using a new request
+      postImage(url);
+    });
+  });
+  
+  req.on('error', (e) => {
+    console.error(e);
+    console.log();
+  });
+  
+  // read the image file and send the data as the req body
+  fs.readFile(imageName, (err, data) => {
+    if (err) throw err;
+    req.end(data);
+  });
+}
+
+let postImageReq = (url,text="jojo",type="image") => {
   return {
-    options: sendMessage().options,
+    options: sendMessageReq().options,
     body: {
       bot_id: BOTID,
-      text: "jojo",
+      text: text,
       attachments: [{
-        type: "image",
-        // "url": "https://i.groupme.com/somethingsomething.large"
+        type: type,
         url: url
       }]
     }
   }
 }
 
-function uploadImage(req,imgName='capture.jpeg'){
-  fs.readFile(imgName, (err, data) => {
-    if (err) throw err;
-    req.end(data);
+// post the image on the chat
+function postImage(url){
+  const req = https.request(postImageReq(url).options, (res) => {
+    res.on('data', (d) => {
+      process.stdout.write(d);
+    });
   });
+  
+  req.on('error', (e) => {
+    console.error(e);
+    console.log();
+  });
+  
+  req.end(JSON.stringify(postImageReq(url).body));
 }
 
-const req = https.request(getImgURL().options, (res) => {
-  res.on('data', (d) => {
-    process.stdout.write(d);
-    let url = JSON.parse(d.toString()).payload.picture_url;
-    // console.log(url);
-    process.stdout.write(url);
-  });
-});
-
-req.on('error', (e) => {
-  console.error(e);
-  console.log();
-});
-
-uploadImage(req);
-
-// fs.readFile('capture.jpeg', (e, d) => {
-//   if(e) throw e;
-//   req.end(d);
-// });
-
-// req.end(JSON.stringify(sendImage.body));
-
+// send an image (accepts .png/.jpeg/.jpg)
+function sendImage(imageFileName="capture.png"){
+  getImageURL(imageFileName);
+}
 
 // // const limit = 256;
 // // const color = [0];
