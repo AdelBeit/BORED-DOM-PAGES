@@ -20,3 +20,6 @@ Features: it checks if there is a bookmark with a url matching the hostname of t
 URL example: http://www.example.com/index.html
 
 Hostname example: www.example.com
+
+
+This repo needs an update...
