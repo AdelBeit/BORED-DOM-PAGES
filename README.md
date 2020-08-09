@@ -1,4 +1,4 @@
-# QuickMark [[Python](https://github.com/AdelBeit/Simple-Py-Paint)]
+# Simple Paint [[Python](https://github.com/AdelBeit/Simple-Py-Paint)]
 
 Made this to learn more about python GUI (tkinter) library.
 
@@ -8,7 +8,7 @@ Controls:
   - Clear canvas by double clicking right mouse button
   - Change brush size using the mouse wheel
 
-# Bookmark Overwite [[Javascript](https://github.com/AdelBeit/Overwrite-Chrome-Bookmarks)]
+# QuickMark [[Javascript](https://github.com/AdelBeit/Overwrite-Chrome-Bookmarks)]
 
 Made this to learn more about chrome extensions.
 
