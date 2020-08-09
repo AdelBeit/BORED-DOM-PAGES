@@ -1,4 +1,4 @@
-# Simple Paint [[Python](https://github.com/AdelBeit/Simple-Py-Paint)]
+# QuickMark [[Python](https://github.com/AdelBeit/Simple-Py-Paint)]
 
 Made this to learn more about python GUI (tkinter) library.
 
